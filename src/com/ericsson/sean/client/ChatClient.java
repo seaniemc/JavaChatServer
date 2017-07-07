@@ -1,5 +1,8 @@
+package com.ericsson.sean.client;
+
 import java.awt.*;
 import java.io.*;
+import java.net.Socket;
 
 /**
  * Created by smcgrath on 7/7/2017.
@@ -15,8 +18,8 @@ public class ChatClient extends Frame implements Runnable {
 
      public ChatClient (String title, InputStream in, OutputStream out){
          super(title);
-         this.i = new DataInputStream(new BufferedInputStream(in));
-         this.o = new DataOutputStream(new BufferedOutputStream(out));
+         this.in = new DataInputStream(new BufferedInputStream(in));
+         this.out = new DataOutputStream(new BufferedOutputStream(out));
          setLayout(new BorderLayout());
          add("Center", output = new TextArea());
          output.setEditable(false);
@@ -77,6 +80,14 @@ public class ChatClient extends Frame implements Runnable {
          return super.handleEvent(e);
     }
      public static void main (String args[]) throws IOException {
-         
+         if(args.length != 2)
+             throw new RuntimeException("Syntax: com.ericsson.sean.ChatClient <hosty> <port>");
+
+         Socket s = new Socket (args[0], Integer.parseInt (args[1]));
+
+         new ChatClient("Chat " + args[0]+ ":" + args[1],
+                        s.getInputStream(), s.getOutputStream());
+
      }
+
 }
