@@ -4,6 +4,7 @@ import java.io.*;
 /**
  * Created by smcgrath on 7/7/2017.
  */
+@SuppressWarnings("ALL")
 public class ChatClient extends Frame implements Runnable {
 
     protected DataInputStream in;
@@ -33,14 +34,16 @@ public class ChatClient extends Frame implements Runnable {
                  String line = in.readUTF();
                  output.appendText(line + "\n");
                 }
-                //throws exeception if connection to server is lost
+                //throws exception if connection to server is lost
              }catch (IOException ex) {
              ex.printStackTrace();
          }finally {
+             //signals that the thread is finished
              listener = null;
              input.hide();
              validate();
              try{
+                 //close output stream
                  out.close();
              }catch (IOException ex){
                  ex.printStackTrace();
@@ -48,6 +51,32 @@ public class ChatClient extends Frame implements Runnable {
          }
 
     }
-    // public boolean handleEvent (Event e) ...
-    // public static void main (String args[]) throws IOException ..
+    //Method checks to for 2 UI events
+    public boolean handleEvent (Event e) {
+         //checks to see if the hits return in the TextField
+         if((e.target == input)&& (e.id == Event.ACTION_EVENT)){
+             try {
+                 //write message to output stream
+                 out.writeUTF((String)e.arg);
+                 //call flush
+                 out.flush();
+             } catch (IOException e1) {
+                 e1.printStackTrace();
+                 //if we get an error we kill the thread
+                 listener.stop();
+             }
+             input.setText("");
+             return true;
+             //if user closes frame we kill the thread and hide the frame
+         }else if((e.target == this)&& (e.id == Event.WINDOW_DESTROY)){
+             if(listener != null)
+                 listener.stop();
+             hide();
+             return true;
+         }
+         return super.handleEvent(e);
+    }
+     public static void main (String args[]) throws IOException {
+         
+     }
 }
